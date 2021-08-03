@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Stopwatch from './../StopwatchRedux';
+import SignUpPage from './../SignUpPage';
 
 import Container from '@material-ui/core/Container';
 
@@ -12,7 +12,7 @@ function App() {
   return (
     <Provider store={store}>
       <Container maxWidth="sm">
-        <Stopwatch />
+        <SignUpPage />
       </Container>
     </Provider>
   );
