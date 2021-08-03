@@ -19,39 +19,73 @@ interface Session {
 function Stopwatch(props: StopWatchProps) {
 
   let isActive: boolean = false;
-  let pMinutes: number = 0;
+  let pMilisec: number = 0;
 
+  /*
   if(props["minutes"]){
     isActive = true;
     pMinutes = props.minutes;
   }
+  */
 
   const [sActive, setActive] = useState(isActive);
-  const [sMinutes, setMinutes] = useState(pMinutes);
+  const [sMilisec, setMilisec] = useState(pMilisec);
   const [sTotal, setTotal] = useState(0);
-
-  totalTimeSpentToday().then(result => setTotal(result)).catch(e => console.log(e));
+  const [sStartTime, setStart] = useState(new Date());
 
   useEffect(() => {
 
-  }, [props, sMinutes, sActive]);
+    if(sActive){
+
+      setTimeout(() => {
+
+        let currentTime: Date = new Date();
+        let difference: number = currentTime.getTime() - sStartTime.getTime();
+        setMilisec(difference);
+
+      }, 500);
+
+    }else{
+      
+      totalTimeSpentToday().then(result => setTotal(result)).catch(e => console.log(e));
+
+    }
+
+  }, [props, sMilisec, sActive]);
 
   let h: number = 0;
   let m: number = 0;
+  let clockButton;
 
   if(sActive){
-    h = Math.floor(sMinutes / 60);
-    m = sMinutes % 60;
+    h = Math.floor(sMilisec / 3600000);
+    m = Math.floor(sMilisec / 60000);
+    clockButton = (<Button style={{
+        width: "100%",
+        backgroundColor: "red",
+        color: "white"
+      }}
+      onClick={() => { setActive(false); }}>
+        <b>CLOCK OUT</b>
+      </Button>);
   }else{
     h = Math.floor(sTotal / 60);
     m = sTotal % 60;
+    clockButton = <Button style={{
+        width: "100%",
+        backgroundColor: "#06c383",
+        color: "white"
+      }}
+      onClick={() => { setStart(new Date()); setActive(true); }}>
+        <b>CLOCK IN</b>
+      </Button>;
   }
 
   return(
     <Grid container>
       <Grid item xs={12} id="title">
         <h1>
-          {sActive ? "TIME SPENT TODAY: " + (minutesToHouresFormated(sTotal + sMinutes)).toString() : "TOTAL TIME SPENT TODAY"}
+          {sActive ? "TIME SPENT TODAY: " + (minutesToHouresFormated(sTotal + Math.floor(sMilisec / 60000))).toString() : "TOTAL TIME SPENT TODAY"}
         </h1>
         <br/><br/>
       </Grid>
@@ -79,19 +113,19 @@ function Stopwatch(props: StopWatchProps) {
         </Grid>
       </Grid>
       <Grid item xs={12} className="button-container">
-          <Button style={{width: "100%", backgroundColor: "#A1A1A1", color: "white"}}><b>REPORTS</b></Button>
-      </Grid>
-      <Grid item xs={12} className="button-container">
           <Button style={{
             width: "100%",
-            backgroundColor: "#06c383",
+            backgroundColor: "#A1A1A1",
             color: "white"
           }}>
-            <b>CLOCK IN</b>
+          <b>REPORTS</b>
           </Button>
       </Grid>
+      <Grid item xs={12} className="button-container">
+          {clockButton}
+      </Grid>
       {sActive.toString()}<br/>
-      {sMinutes}<br/>
+      {sMilisec}<br/>
       {minutesToHouresFormated(sTotal)}
     </Grid>
   )
