@@ -1,0 +1,12 @@
+.row{
+  color: rgb(161, 161, 161);
+}
+
+.report-detail-row{
+  border-top: 1px solid rgb(161, 161, 161);
+}
+
+.report-total-row{
+  border-top: 1px solid rgb(6, 195, 131);
+  color: black;
+}

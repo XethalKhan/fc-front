@@ -1,0 +1,23 @@
+#title {
+  text-align: center;
+}
+
+#digits{
+  text-align: center;
+  font-size: 150px;
+}
+
+.button-container{
+  padding: 10px;
+}
+
+#report-button:hover{
+  background-color: "black";
+}
+/*
+#report-button{
+  width: "100%";
+  background-color: "#A1A1A1";
+  color: "white";
+}
+*/
