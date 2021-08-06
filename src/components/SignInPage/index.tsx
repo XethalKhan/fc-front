@@ -2,55 +2,60 @@ import React, { useState, useEffect } from 'react';
 import './SignInPage.css';
 
 import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
-import {
-  withStyles
-} from '@material-ui/core/styles';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
+import type { RootState } from './../../lib/redux/store';
 
-const CssTextField = withStyles({
-  root: {
-    '& label.Mui-focused': {
-      color: '#06C383',
-    },
-    '& .MuiInput-underline:after': {
-      borderBottomColor: '#06C383',
-    },
-    '& .MuiInput-underline.Mui-error:after': {
-      borderBottomColor: 'red'
-    },
-    '& .MuiFormLabel-root.Mui-error': {
-      color: "red"
-    }
-    /*
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: 'orange',
-      },
-      '&:hover fieldset': {
-        borderColor: 'red',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: 'pink',
-      },
-    },
-    */
-  },
-})(TextField);
+import { useAppSelector, useAppDispatch } from './../../lib/redux/hooks';
+import { loginSuccessAction, loginAttemptThunk } from './../../lib/redux/user';
+
+import InputText from './../InputText';
+
+import { useHistory } from "react-router-dom";
 
 function SignInPage(){
+
+  const dispatch = useAppDispatch();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const isLogedIn = useAppSelector((state) => state.user.access);
+
+  const history = useHistory();
+
+    useEffect(() => {
+
+      if(isLogedIn){
+        history.push('/');
+      }
+
+    }, [isLogedIn]);
 
   return(
     <Grid container spacing={3}>
      <Grid item xs={12}>
-
      </Grid>
      <Grid item xs={12}>
-       <CssTextField label="EMAIL" style={{width: "100%"}} placeholder="email@example.com" InputLabelProps={{shrink: true}}/>
+       <InputText
+        label="EMAIL"
+        style={{width: "100%"}}
+        placeholder="email@example.com"
+        InputLabelProps={{shrink: true}}
+        onChange={(e)=>{setEmail(e.target.value)}}
+        />
      </Grid>
      <Grid item xs={12}>
-      <CssTextField label="PASSWORD" style={{width: "100%"}} placeholder="5+ characters" InputLabelProps={{shrink: true}}/>
+      <InputText
+      type="password"
+      label="PASSWORD"
+      style={{width: "100%"}}
+      placeholder="5+ characters"
+      InputLabelProps={{shrink: true}}
+      onChange={(e)=>{setPassword(e.target.value)}}
+      />
      </Grid>
      <Grid item xs={12}>
      </Grid>
@@ -59,7 +64,13 @@ function SignInPage(){
           width: "100%",
           backgroundColor: "#06c383",
           color: "white"
-        }}>SIGN IN</Button>
+        }}
+        type="submit"
+        onClick={()=> {
+          //https://stackoverflow.com/questions/64857870/how-to-dispatch-thunkaction-with-redux-thunk-and-typescript
+          (dispatch as ThunkDispatch<RootState, unknown, AnyAction>)(loginAttemptThunk(email, password));
+        }
+        }>SIGN IN</Button>
      </Grid>
     </Grid>
   );

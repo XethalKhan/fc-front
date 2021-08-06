@@ -1,11 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit';
+import thunk from 'redux-thunk';
 
-import sessionReducer from './sessionSlice';
+import sessionReducer from './session/slice';
+import userReducer from './user/slice';
+import messageReducer from './message/slice';
 
 const store = configureStore({
   reducer: {
-    session: sessionReducer
+    session: sessionReducer,
+    user: userReducer,
+    message: messageReducer
   },
+  middleware: [thunk]
 });
 
 export default store;

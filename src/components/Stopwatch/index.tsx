@@ -6,26 +6,48 @@ import Clock from './../Clock';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 
-import { useAppSelector, useAppDispatch } from './../../redux/hooks';
-import { start, end, increment, totalSetup } from './../../redux/sessionSlice'
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
+import type { RootState } from './../../lib/redux/store';
+
+import { useAppSelector, useAppDispatch } from './../../lib/redux/hooks';
+import { startAttemptThunk, endAttemptThunk, incrementAction, totalSetupAction } from './../../lib/redux/session';
+
+import { useHistory } from "react-router-dom";
 
 function Stopwatch() {
 
   const dispatch = useAppDispatch();
 
   const isActive = useAppSelector((state) => state.session.active);
-  let milisec = useAppSelector((state) => state.session.milisec);
+  const milisec = useAppSelector((state) => state.session.milisec);
   const total = useAppSelector((state) => state.session.total);
+
+  const isLogedIn = useAppSelector((state) => state.user.access);
+
+  const history = useHistory();
+
+  useEffect(() => {
+
+    if(!isLogedIn){
+      history.push('/sign-in');
+    }
+
+  }, [isLogedIn]);
 
   useEffect(() => {
 
     if(isActive){
-      setTimeout(() => { dispatch(increment()); }, 500);
+      setTimeout(() => { dispatch(incrementAction()); }, 500);
     }else{
-      totalTimeSpentToday().then(result => dispatch(totalSetup(result))).catch(e => console.log(e));
+      totalTimeSpentToday().then(result => dispatch(totalSetupAction(result))).catch(e => console.log(e));
     }
 
   }, [isActive, milisec]);
+
+  if(!isLogedIn){
+    return(null);
+  }
 
   let h: number = 0;
   let m: number = 0;
@@ -39,7 +61,7 @@ function Stopwatch() {
         backgroundColor: "red",
         color: "white"
       }}
-      onClick={() => { dispatch(end()); }}>
+      onClick={() => { (dispatch as ThunkDispatch<RootState, unknown, AnyAction>)(endAttemptThunk()); }}>
         <b>CLOCK OUT</b>
       </Button>);
   }else{
@@ -50,7 +72,7 @@ function Stopwatch() {
         backgroundColor: "#06c383",
         color: "white"
       }}
-      onClick={() => { dispatch(start()); }}>
+      onClick={() => { (dispatch as ThunkDispatch<RootState, unknown, AnyAction>)(startAttemptThunk()); }}>
         <b>CLOCK IN</b>
       </Button>;
   }
