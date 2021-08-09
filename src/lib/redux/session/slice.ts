@@ -31,8 +31,12 @@ export const sessionSlice = createSlice({
     increment: (state) => {
       let currentTime: Date = new Date();
       let difference: number = currentTime.getTime() - state.start;
-
       state.milisec = difference;
+    },
+    active: (state, action: PayloadAction<Date>) => {
+      state.active = true;
+      state.start = action.payload.getTime();
+      state.milisec = (new Date().getTime() - state.start);
     },
     totalSetup: (state, action: PayloadAction<number>) => {
       state.total = action.payload;
@@ -40,6 +44,6 @@ export const sessionSlice = createSlice({
   },
 })
 
-export const { start, end, increment, totalSetup } = sessionSlice.actions;
+export const { start, end, increment, active, totalSetup } = sessionSlice.actions;
 
 export default sessionSlice.reducer;

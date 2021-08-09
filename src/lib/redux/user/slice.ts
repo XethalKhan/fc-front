@@ -2,11 +2,21 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface UserState {
   token: string,
+  user?: {
+    id: number,
+    full_name: string,
+    email: string
+  },
   access: boolean
 }
 
 interface UserToken {
-  token: string
+  token: string,
+  user: {
+    id: number,
+    full_name: string,
+    email: string
+  }
 }
 
 // Define the initial state using UserState type
@@ -21,10 +31,10 @@ export const userSlice = createSlice({
   reducers: {
     loginSuccess: (state, action: PayloadAction<UserToken>) => {
       state.token = action.payload.token;
+      state.user = action.payload.user;
       state.access = true;
     },
     logoutSuccess: (state) => {
-      console.log("LOGOUT");
       state.access = false;
     },
   },

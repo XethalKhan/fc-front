@@ -25,17 +25,17 @@ function Clock(props: ClockProps){
       </Grid>
     </Grid>
     <Grid container item xs={12}>
-      <Grid item xs={1}>
+      <Grid item xs={3}>
       </Grid>
-      <Grid item xs={4} style={{textAlign: "center"}}>
+      <Grid item xs={2} style={{textAlign: "center"}}>
         HOURS
       </Grid>
       <Grid item xs={2}>
       </Grid>
-      <Grid item xs={4} style={{textAlign: "center"}}>
+      <Grid item xs={2} style={{textAlign: "center"}}>
         MINUTES
       </Grid>
-      <Grid item xs={1}>
+      <Grid item xs={3}>
       </Grid>
     </Grid>
     </React.Fragment>

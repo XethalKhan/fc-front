@@ -10,6 +10,16 @@ import {
 
 const CssTextField = withStyles({
   root: {
+    '& .MuiFormLabel-root': {
+      color: 'white',
+      fontWeight: "bold"
+    },
+    '& .MuiInputBase-input': {
+      color: "#8F9297",
+    },
+    '& .MuiInput-underline:before': {
+      borderBottomColor: '#8F9297',
+    },
     '& label.Mui-focused': {
       color: '#06C383',
     },
@@ -22,7 +32,7 @@ const CssTextField = withStyles({
     '& .MuiFormLabel-root.Mui-error': {
       color: "red"
     }
-  },
+  }
 })(TextField);
 
 function InputText(props: TextFieldProps){

@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import './Stopwatch.css';
 
+import Top from './../Top';
 import Clock from './../Clock';
+import CurrentTime from './../CurrentTime';
 
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -11,9 +13,11 @@ import { ThunkDispatch } from 'redux-thunk';
 import type { RootState } from './../../lib/redux/store';
 
 import { useAppSelector, useAppDispatch } from './../../lib/redux/hooks';
-import { startAttemptThunk, endAttemptThunk, incrementAction, totalSetupAction } from './../../lib/redux/session';
+import { startAttemptThunk, endAttemptThunk, activeAttemptThunk, incrementAction, totalSetupAction } from './../../lib/redux/session';
 
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
+
+import {filterSession} from './../../lib/api/session';
 
 function Stopwatch() {
 
@@ -24,6 +28,7 @@ function Stopwatch() {
   const total = useAppSelector((state) => state.session.total);
 
   const isLogedIn = useAppSelector((state) => state.user.access);
+  const token = useAppSelector((state) => state.user.token);
 
   const history = useHistory();
 
@@ -40,10 +45,19 @@ function Stopwatch() {
     if(isActive){
       setTimeout(() => { dispatch(incrementAction()); }, 500);
     }else{
-      totalTimeSpentToday().then(result => dispatch(totalSetupAction(result))).catch(e => console.log(e));
+      totalTimeSpentToday(token).then(result => dispatch(totalSetupAction(result))).catch(e => console.log(e));
     }
 
-  }, [isActive, milisec]);
+  }, [milisec]);
+
+  useEffect(() => {
+
+    if(isActive){
+      (dispatch as ThunkDispatch<RootState, unknown, AnyAction>)(activeAttemptThunk());
+    }
+
+  }, [isActive]);
+
 
   if(!isLogedIn){
     return(null);
@@ -79,28 +93,36 @@ function Stopwatch() {
 
   return(
     <Grid container>
+      <Grid item xs={12}>
+        <Top />
+      </Grid>
+      <Grid item xs={12}>
+        <CurrentTime/>
+      </Grid>
       <Grid item xs={12} id="title">
-        <h1>
-          {isActive ? "TIME SPENT TODAY: " + (minutesToHouresFormated(total + Math.floor(milisec / 60000))).toString() : "TOTAL TIME SPENT TODAY"}
-        </h1>
+        <br/><br/>
+        {isActive ? "TIME SPENT TODAY: " + (minutesToHouresFormated(total + Math.floor(milisec / 60000))).toString() : "TOTAL TIME SPENT TODAY"}
+        <br/>
+      </Grid>
+      <Grid item xs={12}>
+        <br/><br/>
+        <Clock hours={h} minutes={m}/>
         <br/><br/>
       </Grid>
-      <Clock hours={h} minutes={m}/>
       <Grid item xs={12} className="button-container">
-          <Button style={{
-            width: "100%",
-            backgroundColor: "#A1A1A1",
-            color: "white"
-          }}>
-          <b>REPORTS</b>
+          <Link to="/report" style={{ textDecoration: 'none' }}>
+            <Button style={{
+              width: "100%",
+              backgroundColor: "#A1A1A1",
+              color: "white"
+            }}>
+            <b>REPORTS</b>
           </Button>
+          </Link>
       </Grid>
       <Grid item xs={12} className="button-container">
           {clockButton}
       </Grid>
-      {isActive.toString()}<br/>
-      {milisec}<br/>
-      {minutesToHouresFormated(total)}
     </Grid>
   )
 
@@ -108,21 +130,11 @@ function Stopwatch() {
 
 export default Stopwatch;
 
-async function totalTimeSpentToday(): Promise<number>{
+async function totalTimeSpentToday(token: string): Promise<number>{
 
   let dateObj = new Date();
 
-  let month = dateObj.getUTCMonth() + 1; //months from 1-12
-  let day = dateObj.getUTCDate();
-  let year = dateObj.getUTCFullYear();
-
-  let date = year + "-" + month + "-" + day;
-
-  let url: string = "http://localhost:3000/session?date=" + date;
-
-  return window.fetch(url, {
-    method: "GET",
-  })
+  return filterSession(token, {date: dateObj})
   .then(response => response.json())
   .then(data => {
     let result = 0;

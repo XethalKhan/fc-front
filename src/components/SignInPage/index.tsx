@@ -12,8 +12,9 @@ import { useAppSelector, useAppDispatch } from './../../lib/redux/hooks';
 import { loginSuccessAction, loginAttemptThunk } from './../../lib/redux/user';
 
 import InputText from './../InputText';
+import WelcomeLogo from './../WelcomeLogo';
 
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 function SignInPage(){
 
@@ -35,8 +36,9 @@ function SignInPage(){
     }, [isLogedIn]);
 
   return(
-    <Grid container spacing={3}>
+    <Grid container spacing={3} style={{backgroundColor: "#202630"}}>
      <Grid item xs={12}>
+      <WelcomeLogo/>
      </Grid>
      <Grid item xs={12}>
        <InputText
@@ -58,6 +60,7 @@ function SignInPage(){
       />
      </Grid>
      <Grid item xs={12}>
+      <br/><br/><br/><br/>
      </Grid>
      <Grid item xs={12} style={{textAlign: "center"}}>
       <Button style={{
@@ -71,6 +74,14 @@ function SignInPage(){
           (dispatch as ThunkDispatch<RootState, unknown, AnyAction>)(loginAttemptThunk(email, password));
         }
         }>SIGN IN</Button>
+     </Grid>
+     <Grid item xs={12} style={{color: "white", textAlign: "center"}}>
+      Not a member?&nbsp;&nbsp;&nbsp;
+      <Link to="/sign-up" style={{color: "#06c383"}}>SIGN UP</Link>
+      <br/>
+     </Grid>
+     <Grid item xs={12}>
+      <br/><br/><br/>
      </Grid>
     </Grid>
   );

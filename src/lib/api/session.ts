@@ -1,4 +1,33 @@
+import { dateToString } from "./../util";
+
 const URL: string = "http://localhost:3000/";
+
+interface SessionFilter{
+  id?: number,
+  date?: Date
+}
+
+async function filter(token: string, filter: SessionFilter){
+
+  let access: string = URL + "/session?token=" + token;
+
+  if(filter.date){
+    access += "&date=" + dateToString(filter.date);
+  }
+
+  if(filter.id){
+    access += "&id=" + filter.id;
+  }
+
+  //access = access.slice(0, -1);
+
+  let response = await window.fetch(access, {
+    method: "GET"
+  });
+
+  return response;
+
+}
 
 async function start(token: string){
 
@@ -36,12 +65,32 @@ async function end(token: string){
 
 }
 
+async function active(token: string){
+
+  let access: string = URL + "session/active?token=" + token;
+
+  let response = await window.fetch(access, {
+    method: "GET",
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  });
+
+  return response;
+
+}
+
+export const filterSession = filter;
 export const startSession = start;
 export const endSession = end;
+export const activeSession = active;
 
 let toBeExported = {
+  filterSession,
   startSession,
-  endSession
+  endSession,
+  activeSession
 }
 
 export default toBeExported;

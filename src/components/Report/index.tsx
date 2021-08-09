@@ -3,8 +3,15 @@ import './Report.css';
 
 import Grid from '@material-ui/core/Grid';
 
+import ReportRow from './../ReportRow';
+
+import { useAppSelector } from './../../lib/redux/hooks';
+
+import {stringfyHouresFromMinutes} from './../../lib/util';
+import {filterSession} from './../../lib/api/session';
+
 interface ReportProps {
-  date: string
+  date: Date
 }
 
 interface Session {
@@ -20,10 +27,7 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 function Report(props: ReportProps) {
 
-  let pDate: string = props.date;
-
-  const [sDate, setDate] = useState(pDate);
-  const dateObj: Date = new Date(sDate);
+  const token: string = useAppSelector(state => state.user.token);
 
   let emptyList: Session[] = [];
 
@@ -32,83 +36,60 @@ function Report(props: ReportProps) {
   let total_duration: number = 0;
 
   const listItems = sList.map((row, index) => {
-      let start_hour: number = row.start.getHours();
-      let start_minute: number = row.start.getMinutes();
 
-      let start_time: string = start_hour < 10 ? "0" + start_hour.toString() : start_hour.toString();
-      start_time += ":";
-      start_time += start_minute < 10 ? "0" + start_minute.toString() : start_minute.toString();
+      let ending = row.end == null ? row.start.getTime() : row.end.getTime();
 
-      let end_time: string = "ACTIVE";
-      let duration: string = "";
-      if(row.end !== null){
-        let end_hour: number = row.end.getHours();
-        let end_minute: number = row.end.getMinutes();
+      total_duration += Math.floor((ending - row.start.getTime()) / 60000);
 
-        end_time = end_hour < 10 ? "0" + end_hour.toString() : end_hour.toString();
-        end_time += ":";
-        end_time += end_minute < 10 ? "0" + end_minute.toString() : end_minute.toString();
-
-        let difference: number = Math.floor((row.end.getTime() - row.start.getTime()) / 60000);
-
-        duration = minutesToHouresFormated(difference);
-
-        total_duration += difference;
-      }
-
-      return <Grid container item key={row.id} className={"row " + (index != 0 ? "report-detail-row" : "")}>
-        <Grid item xs={2} style={{padding: 10, paddingLeft: 2}}>{start_time}&nbsp;-&nbsp;{end_time}</Grid>
-        <Grid item xs={8}></Grid>
-        <Grid item xs={2} style={{padding: 10, paddingRight: 2}}>{duration}</Grid>
-      </Grid>
-    }
-  );
+      return <ReportRow
+        session={row as Session}
+        key={row.id}/>
+    });
 
   useEffect(() => {
 
-    getSessionsByDate(sDate)
-    .then(data => {
+    getSessionsByDate(token, props.date).then(data => {
       setList(data);
     }).catch(e => console.log(e));
 
-  }, [props, sDate]);
+  }, [props]);
 
-  if(sList.length == 0){
+  if(sList.length === 0){
     return (null);
   }
 
   return(
-    <Grid container spacing={3}>
+    <Grid container>
       <Grid item xs={12}>
-        <b>Time report for {DAYS[dateObj.getDay()]},</b>
+        <b>Time report for {DAYS[props.date.getDay()]},</b>
         &nbsp;
-        <span style={{color: "#A1A1A1"}}>{dateObj.getDate()}&nbsp;{MONTHS[dateObj.getMonth()]}</span>
+        <span style={{color: "#A1A1A1"}}>{props.date.getDate()}&nbsp;{MONTHS[props.date.getMonth()]}</span>
         &nbsp;
         <b>:</b>
       </Grid>
       {listItems}
       <Grid container item xs={12} className="report-total-row">
-        <Grid item xs={2} style={{padding: 10, paddingLeft: 2}}><b>Total:</b></Grid>
+        <Grid item xs={2} style={{padding: 10, paddingLeft: 2}}>Total:</Grid>
         <Grid item xs={8}></Grid>
-        <Grid item xs={2} style={{padding: 10, paddingRight: 2}}>{minutesToHouresFormated(total_duration)}</Grid>
+        <Grid item xs={2} style={{padding: 10, paddingRight: 2}}>{stringfyHouresFromMinutes(total_duration)}</Grid>
       </Grid>
     </Grid>
   );
 
 }
 
-async function getSessionsByDate(date: string): Promise<Session[]>{
+async function getSessionsByDate(token: string, date: Date): Promise<Session[]>{
 
-  let url: string = "http://localhost:3000/session?date=" + date;
+  let httpResponse = await filterSession(token, {date: date});
 
-  return window.fetch(url, {
-    method: "GET",
-  })
-  .then(response => response.json())
-  .then(data => {
+  if(httpResponse.status === 200){
+
+    const data = await httpResponse.json();
+
     let tmp: Session[] = [];
 
     for(let i = 0; i < data.length; i++){
+
       tmp.push({
         id: data[i].id,
         start: new Date(data[i].start),
@@ -116,21 +97,15 @@ async function getSessionsByDate(date: string): Promise<Session[]>{
         created_at: new Date(data[i].created_at),
         updated_at: new Date(data[i].updated_at)
       });
+
     }
 
     return tmp;
-  });
-}
 
-function minutesToHouresFormated(minutes: number): string{
-  let h = Math.floor(minutes / 60);
-  let m = minutes % 60;
+  }else{
+    return [];
+  }
 
-  let result: string = (h < 10 ? "0" + h.toString() : h.toString()) + "h";
-  result += " ";
-  result += (m < 10 ? "0" + m.toString() : m.toString()) + "m";
-
-  return result;
 }
 
 export default Report;

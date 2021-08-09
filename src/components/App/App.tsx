@@ -4,6 +4,7 @@ import './App.css';
 import SignInPage from './../SignInPage';
 import SignUpPage from './../SignUpPage';
 import Stopwatch from './../Stopwatch';
+import ReportPage from './../ReportPage';
 import Message from './../Message';
 
 import Container from '@material-ui/core/Container';
@@ -23,8 +24,10 @@ function App() {
     <Router>
     <Provider store={store}>
       <Container maxWidth="sm">
-      <Message />
         <Switch>
+          <Route path="/report">
+            <ReportPage />
+          </Route>
           <Route path="/sign-up">
             <SignUpPage />
           </Route>

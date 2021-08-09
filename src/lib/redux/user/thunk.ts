@@ -1,4 +1,4 @@
-import { login } from './../../api/user';
+import { login, logout, createUser } from './../../api/user';
 
 import {
   errorMessage,
@@ -23,7 +23,7 @@ export const loginThunk = (email: string, password: string) => {
       dispatch(successMessage("Welcome back!"));
 
       let parsed = await response.json();
-      dispatch(loginSuccess({token: parsed.token}));
+      dispatch(loginSuccess({token: parsed.token, user: parsed.user}));
 
     }else if(httpStatus === 403){
       dispatch(errorMessage("Access denied!"));
@@ -35,5 +35,48 @@ export const loginThunk = (email: string, password: string) => {
 
 }
 
+export const logoutThunk = () => {
 
-export default loginThunk;
+  return async (dispatch: any, getState: any) => {
+
+    let state = getState();
+    let token: string = state.user.token;
+    let response = await logout(token);
+    let httpStatus = response.status;
+
+    if(httpStatus === 200){
+      dispatch(logoutSuccess());
+    }
+
+  };
+
+}
+
+export const createUserThunk = (
+  full_name: string,
+  email: string,
+  password: string) => {
+
+  return async (dispatch: any) => {
+
+    let response = await createUser(full_name, email, password);
+
+    let httpStatus = response.status;
+
+    if(httpStatus === 201){
+      return true;
+    }
+
+    return false;
+
+  };
+
+}
+
+const toBeExported = {
+  loginThunk,
+  logoutThunk,
+  createUserThunk
+}
+
+export default toBeExported;
